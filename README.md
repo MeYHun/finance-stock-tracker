@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 📊 Finance Stock Tracker
 
 [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
@@ -161,3 +162,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 YH Na - [@MeYHun](https://github.com/MeYHun)
 
 Project Link: [https://github.com/MeYHun/finance-stock-tracker](https://github.com/MeYHun/finance-stock-tracker)
+=======
+# finance-stock-tracker
+>>>>>>> c199e287b28d15d97a8ae51a8452e9c0755a606d
