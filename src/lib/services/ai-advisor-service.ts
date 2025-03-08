@@ -1,14 +1,108 @@
 import OpenAI from "openai";
-import {
-	FinancialAdvice,
-	SpendingPattern,
+import type {
+	Insight,
 	PortfolioSuggestion,
+	SpendingPattern,
 	AIAdvisorState,
 } from "@/types/ai-advisor";
 
 export class AIFinancialAdvisor {
 	private openai: OpenAI | null = null;
 	private isApiAvailable: boolean = false;
+	private mockState: AIAdvisorState = {
+		insights: [
+			{
+				id: "1",
+				title: "Unusual Spending Pattern Detected",
+				message:
+					"Your dining expenses have increased by 45% this month compared to your 3-month average.",
+				impact: 45,
+				severity: "high",
+				category: "spending",
+				timestamp: "2024-03-20",
+			},
+			{
+				id: "2",
+				title: "Savings Opportunity",
+				message:
+					"Setting up automatic transfers could help you save an additional $300 monthly.",
+				impact: 30,
+				severity: "medium",
+				category: "saving",
+				timestamp: "2024-03-19",
+			},
+			{
+				id: "3",
+				title: "Investment Recommendation",
+				message:
+					"Based on your risk profile, consider diversifying into tech sector ETFs.",
+				impact: 25,
+				severity: "low",
+				category: "investment",
+				timestamp: "2024-03-18",
+			},
+		],
+		spendingPatterns: [
+			{
+				category: "Dining",
+				currentSpending: 450,
+				averageSpending: 310,
+				trend: "up",
+				percentage: 45,
+			},
+			{
+				category: "Entertainment",
+				currentSpending: 200,
+				averageSpending: 235,
+				trend: "down",
+				percentage: 15,
+			},
+			{
+				category: "Shopping",
+				currentSpending: 350,
+				averageSpending: 350,
+				trend: "stable",
+				percentage: 20,
+			},
+		],
+		portfolioSuggestions: [
+			{
+				id: "1",
+				asset: "Tech Growth ETF",
+				type: "etf",
+				action: "buy",
+				reason:
+					"Strong sector performance and aligned with your risk profile",
+				impact: {
+					potential: 12,
+					risk: "medium",
+				},
+			},
+			{
+				id: "2",
+				asset: "Green Energy Stock",
+				type: "stock",
+				action: "buy",
+				reason: "Emerging sector with high growth potential",
+				impact: {
+					potential: 15,
+					risk: "high",
+				},
+			},
+			{
+				id: "3",
+				asset: "Stable Dividend Stock",
+				type: "stock",
+				action: "hold",
+				reason: "Consistent performance and regular dividend payments",
+				impact: {
+					potential: 8,
+					risk: "low",
+				},
+			},
+		],
+		lastUpdated: new Date().toISOString(),
+	};
 
 	constructor() {
 		const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
@@ -52,71 +146,19 @@ export class AIFinancialAdvisor {
 		];
 	}
 
-	private getMockFinancialAdvice(): FinancialAdvice[] {
-		return [
-			{
-				type: "spending",
-				message:
-					"Your food expenses are trending higher than usual this month.",
-				severity: "warning",
-				category: "Budget Alert",
-				timestamp: new Date().toISOString(),
-				metadata: {
-					currentAmount: 850,
-					threshold: 800,
-					category: "Food & Dining",
-					trend: "up",
-					percentage: 6.25,
-				},
-			},
-			{
-				type: "budget",
-				message:
-					"You're under budget in entertainment spending - great job!",
-				severity: "info",
-				category: "Achievement",
-				timestamp: new Date().toISOString(),
-				metadata: {
-					currentAmount: 200,
-					threshold: 250,
-					category: "Entertainment",
-					trend: "down",
-					percentage: 20,
-				},
-			},
-		];
+	private getMockFinancialAdvice(): Insight[] {
+		return this.mockState.insights;
 	}
 
 	private getMockPortfolioSuggestions(): PortfolioSuggestion[] {
-		return [
-			{
-				type: "diversify",
-				suggestion:
-					"Consider adding more international stocks to your portfolio for better diversification.",
-				impact: {
-					risk: "low",
-					potential_benefit: "Reduced volatility",
-					timeframe: "6-12 months",
-				},
-			},
-			{
-				type: "rebalance",
-				suggestion:
-					"Your tech allocation is higher than recommended. Consider rebalancing.",
-				impact: {
-					risk: "medium",
-					potential_benefit: "Better risk management",
-					timeframe: "1-3 months",
-				},
-			},
-		];
+		return this.mockState.portfolioSuggestions;
 	}
 
 	async analyzeSpendingPatterns(
 		transactions: any[]
 	): Promise<SpendingPattern[]> {
 		if (!this.isApiAvailable) {
-			return this.getMockSpendingPatterns();
+			return this.mockState.spendingPatterns;
 		}
 
 		try {
@@ -144,22 +186,22 @@ export class AIFinancialAdvisor {
 			return analysis.patterns || [];
 		} catch (error) {
 			console.error("Error analyzing spending patterns:", error);
-			return this.getMockSpendingPatterns();
+			return this.mockState.spendingPatterns;
 		}
 	}
 
 	async getFinancialAdvice(
-		spendingPatterns: SpendingPattern[],
+		patterns: SpendingPattern[],
 		budget: any,
 		investments: any
-	): Promise<FinancialAdvice[]> {
+	): Promise<Insight[]> {
 		if (!this.isApiAvailable) {
-			return this.getMockFinancialAdvice();
+			return this.mockState.insights;
 		}
 
 		try {
 			const context = {
-				spendingPatterns,
+				patterns,
 				budget,
 				investments,
 			};
@@ -186,7 +228,7 @@ export class AIFinancialAdvisor {
 			return advice.recommendations || [];
 		} catch (error) {
 			console.error("Error getting financial advice:", error);
-			return this.getMockFinancialAdvice();
+			return this.mockState.insights;
 		}
 	}
 
@@ -194,7 +236,7 @@ export class AIFinancialAdvisor {
 		portfolio: any
 	): Promise<PortfolioSuggestion[]> {
 		if (!this.isApiAvailable) {
-			return this.getMockPortfolioSuggestions();
+			return this.mockState.portfolioSuggestions;
 		}
 
 		try {
@@ -222,7 +264,7 @@ export class AIFinancialAdvisor {
 			return suggestions.recommendations || [];
 		} catch (error) {
 			console.error("Error getting portfolio suggestions:", error);
-			return this.getMockPortfolioSuggestions();
+			return this.mockState.portfolioSuggestions;
 		}
 	}
 
@@ -275,20 +317,9 @@ export class AIFinancialAdvisor {
 		}
 	}
 
-	async getTaxOptimizationAdvice(
-		financialData: any
-	): Promise<FinancialAdvice[]> {
+	async getTaxOptimizationAdvice(financialData: any): Promise<Insight[]> {
 		if (!this.isApiAvailable) {
-			return [
-				{
-					type: "tax",
-					message:
-						"Consider maximizing your retirement contributions to reduce taxable income.",
-					severity: "info",
-					category: "Tax Planning",
-					timestamp: new Date().toISOString(),
-				},
-			];
+			return this.mockState.insights;
 		}
 
 		try {
@@ -314,16 +345,7 @@ export class AIFinancialAdvisor {
 			return advice.recommendations || [];
 		} catch (error) {
 			console.error("Error getting tax optimization advice:", error);
-			return [
-				{
-					type: "tax",
-					message:
-						"Consider maximizing your retirement contributions to reduce taxable income.",
-					severity: "info",
-					category: "Tax Planning",
-					timestamp: new Date().toISOString(),
-				},
-			];
+			return this.mockState.insights;
 		}
 	}
 }
