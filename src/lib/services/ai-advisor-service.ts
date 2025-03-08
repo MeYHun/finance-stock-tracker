@@ -157,12 +157,12 @@ export class AIFinancialAdvisor {
 	async analyzeSpendingPatterns(
 		transactions: any[]
 	): Promise<SpendingPattern[]> {
-		if (!this.isApiAvailable) {
+		if (!this.isApiAvailable || !this.openai) {
 			return this.mockState.spendingPatterns;
 		}
 
 		try {
-			const response = await this.openai!.chat.completions.create({
+			const response = await this.openai.chat.completions.create({
 				model: "gpt-4-turbo-preview",
 				messages: [
 					{
@@ -180,10 +180,13 @@ export class AIFinancialAdvisor {
 				response_format: { type: "json_object" },
 			});
 
-			const analysis = JSON.parse(
-				response.choices[0].message.content || "{}"
-			);
-			return analysis.patterns || [];
+			const content = response.choices[0].message.content;
+			if (!content) {
+				throw new Error("No content in OpenAI response");
+			}
+
+			const analysis = JSON.parse(content);
+			return analysis.patterns || this.mockState.spendingPatterns;
 		} catch (error) {
 			console.error("Error analyzing spending patterns:", error);
 			return this.mockState.spendingPatterns;
@@ -195,7 +198,7 @@ export class AIFinancialAdvisor {
 		budget: any,
 		investments: any
 	): Promise<Insight[]> {
-		if (!this.isApiAvailable) {
+		if (!this.isApiAvailable || !this.openai) {
 			return this.mockState.insights;
 		}
 
@@ -206,7 +209,7 @@ export class AIFinancialAdvisor {
 				investments,
 			};
 
-			const response = await this.openai!.chat.completions.create({
+			const response = await this.openai.chat.completions.create({
 				model: "gpt-4-turbo-preview",
 				messages: [
 					{
@@ -224,8 +227,13 @@ export class AIFinancialAdvisor {
 				response_format: { type: "json_object" },
 			});
 
-			const advice = JSON.parse(response.choices[0].message.content || "{}");
-			return advice.recommendations || [];
+			const content = response.choices[0].message.content;
+			if (!content) {
+				throw new Error("No content in OpenAI response");
+			}
+
+			const advice = JSON.parse(content);
+			return advice.recommendations || this.mockState.insights;
 		} catch (error) {
 			console.error("Error getting financial advice:", error);
 			return this.mockState.insights;
@@ -235,12 +243,12 @@ export class AIFinancialAdvisor {
 	async getPortfolioSuggestions(
 		portfolio: any
 	): Promise<PortfolioSuggestion[]> {
-		if (!this.isApiAvailable) {
+		if (!this.isApiAvailable || !this.openai) {
 			return this.mockState.portfolioSuggestions;
 		}
 
 		try {
-			const response = await this.openai!.chat.completions.create({
+			const response = await this.openai.chat.completions.create({
 				model: "gpt-4-turbo-preview",
 				messages: [
 					{
@@ -258,10 +266,15 @@ export class AIFinancialAdvisor {
 				response_format: { type: "json_object" },
 			});
 
-			const suggestions = JSON.parse(
-				response.choices[0].message.content || "{}"
+			const content = response.choices[0].message.content;
+			if (!content) {
+				throw new Error("No content in OpenAI response");
+			}
+
+			const suggestions = JSON.parse(content);
+			return (
+				suggestions.recommendations || this.mockState.portfolioSuggestions
 			);
-			return suggestions.recommendations || [];
 		} catch (error) {
 			console.error("Error getting portfolio suggestions:", error);
 			return this.mockState.portfolioSuggestions;
@@ -272,7 +285,7 @@ export class AIFinancialAdvisor {
 		strategy: any,
 		historicalData: any
 	): Promise<any> {
-		if (!this.isApiAvailable) {
+		if (!this.isApiAvailable || !this.openai) {
 			return {
 				expectedReturn: "8-10%",
 				risk: "moderate",
@@ -287,7 +300,7 @@ export class AIFinancialAdvisor {
 				historicalData,
 			};
 
-			const response = await this.openai!.chat.completions.create({
+			const response = await this.openai.chat.completions.create({
 				model: "gpt-4-turbo-preview",
 				messages: [
 					{
@@ -305,7 +318,12 @@ export class AIFinancialAdvisor {
 				response_format: { type: "json_object" },
 			});
 
-			return JSON.parse(response.choices[0].message.content || "{}");
+			const content = response.choices[0].message.content;
+			if (!content) {
+				throw new Error("No content in OpenAI response");
+			}
+
+			return JSON.parse(content);
 		} catch (error) {
 			console.error("Error simulating investment strategy:", error);
 			return {
@@ -318,12 +336,12 @@ export class AIFinancialAdvisor {
 	}
 
 	async getTaxOptimizationAdvice(financialData: any): Promise<Insight[]> {
-		if (!this.isApiAvailable) {
+		if (!this.isApiAvailable || !this.openai) {
 			return this.mockState.insights;
 		}
 
 		try {
-			const response = await this.openai!.chat.completions.create({
+			const response = await this.openai.chat.completions.create({
 				model: "gpt-4-turbo-preview",
 				messages: [
 					{
@@ -341,8 +359,13 @@ export class AIFinancialAdvisor {
 				response_format: { type: "json_object" },
 			});
 
-			const advice = JSON.parse(response.choices[0].message.content || "{}");
-			return advice.recommendations || [];
+			const content = response.choices[0].message.content;
+			if (!content) {
+				throw new Error("No content in OpenAI response");
+			}
+
+			const advice = JSON.parse(content);
+			return advice.recommendations || this.mockState.insights;
 		} catch (error) {
 			console.error("Error getting tax optimization advice:", error);
 			return this.mockState.insights;

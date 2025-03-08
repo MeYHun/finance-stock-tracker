@@ -1,11 +1,87 @@
 import OpenAI from "openai";
 import { NewsArticle, MarketSentiment, PredictionResult } from "@/types/market";
 
-export class AIMarketAnalyzer {
-	private openai: OpenAI;
+interface MarketAnalysis {
+	overallSentiment: string;
+	keyPoints: string[];
+	riskLevel: string;
+	recommendation: string;
+}
 
-	constructor(apiKey: string) {
-		this.openai = new OpenAI({ apiKey });
+export class AIMarketAnalyzer {
+	private openai: OpenAI | null = null;
+	private isApiAvailable: boolean = false;
+
+	constructor() {
+		const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+		if (apiKey) {
+			try {
+				this.openai = new OpenAI({
+					apiKey,
+					dangerouslyAllowBrowser: true,
+				});
+				this.isApiAvailable = true;
+			} catch (error) {
+				console.error("Failed to initialize OpenAI client:", error);
+				this.isApiAvailable = false;
+			}
+		}
+	}
+
+	async analyzeMarketData(data: any): Promise<MarketAnalysis> {
+		if (!this.isApiAvailable || !this.openai) {
+			return this.getMockAnalysis();
+		}
+
+		try {
+			const response = await this.openai.chat.completions.create({
+				model: "gpt-4-turbo-preview",
+				messages: [
+					{
+						role: "system",
+						content:
+							"You are a financial market analysis AI specializing in technical and fundamental analysis.",
+					},
+					{
+						role: "user",
+						content: `Analyze this market data and provide insights: ${JSON.stringify(
+							data
+						)}`,
+					},
+				],
+				response_format: { type: "json_object" },
+			});
+
+			const content = response.choices[0].message.content;
+			if (!content) {
+				throw new Error("No content in OpenAI response");
+			}
+
+			const analysis = JSON.parse(content);
+
+			return {
+				overallSentiment: analysis.sentiment || "neutral",
+				keyPoints: analysis.keyPoints || [],
+				riskLevel: analysis.riskLevel || "moderate",
+				recommendation: analysis.recommendation || "hold",
+			};
+		} catch (error) {
+			console.error("Error analyzing market data:", error);
+			return this.getMockAnalysis();
+		}
+	}
+
+	private getMockAnalysis(): MarketAnalysis {
+		return {
+			overallSentiment: "neutral",
+			keyPoints: [
+				"Market showing mixed signals",
+				"Volume remains consistent",
+				"Technical indicators suggest consolidation",
+			],
+			riskLevel: "moderate",
+			recommendation: "hold",
+		};
 	}
 
 	async analyzeSentiment(news: NewsArticle[]): Promise<MarketSentiment> {
