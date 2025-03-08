@@ -126,14 +126,14 @@ export class AIFinancialAdvisor {
 				category: "Food & Dining",
 				currentSpending: 850,
 				averageSpending: 800,
-				trend: "increasing",
+				trend: "up",
 				percentage: 6.25,
 			},
 			{
 				category: "Entertainment",
 				currentSpending: 200,
 				averageSpending: 250,
-				trend: "decreasing",
+				trend: "down",
 				percentage: -20,
 			},
 			{
