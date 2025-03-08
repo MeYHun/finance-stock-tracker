@@ -106,17 +106,23 @@ export class AIFinancialAdvisor {
 
 	constructor() {
 		const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-		if (apiKey) {
-			try {
-				this.openai = new OpenAI({
-					apiKey,
-					dangerouslyAllowBrowser: true,
-				});
-				this.isApiAvailable = true;
-			} catch (error) {
-				console.error("Failed to initialize OpenAI client:", error);
-				this.isApiAvailable = false;
-			}
+		if (!apiKey) {
+			console.warn(
+				"OpenAI API key is not set. Using mock data for financial advice."
+			);
+			this.isApiAvailable = false;
+			return;
+		}
+
+		try {
+			this.openai = new OpenAI({
+				apiKey,
+				dangerouslyAllowBrowser: true,
+			});
+			this.isApiAvailable = true;
+		} catch (error) {
+			console.error("Failed to initialize OpenAI client:", error);
+			this.isApiAvailable = false;
 		}
 	}
 
