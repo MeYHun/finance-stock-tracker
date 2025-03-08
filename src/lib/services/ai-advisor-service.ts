@@ -158,7 +158,7 @@ export class AIFinancialAdvisor {
 		transactions: any[]
 	): Promise<SpendingPattern[]> {
 		if (!this.isApiAvailable || !this.openai) {
-			return this.mockState.spendingPatterns;
+			return this.getMockSpendingPatterns();
 		}
 
 		try {
@@ -186,10 +186,10 @@ export class AIFinancialAdvisor {
 			}
 
 			const analysis = JSON.parse(content);
-			return analysis.patterns || this.mockState.spendingPatterns;
+			return analysis.patterns || this.getMockSpendingPatterns();
 		} catch (error) {
 			console.error("Error analyzing spending patterns:", error);
-			return this.mockState.spendingPatterns;
+			return this.getMockSpendingPatterns();
 		}
 	}
 
@@ -199,7 +199,7 @@ export class AIFinancialAdvisor {
 		investments: any
 	): Promise<Insight[]> {
 		if (!this.isApiAvailable || !this.openai) {
-			return this.mockState.insights;
+			return this.getMockFinancialAdvice();
 		}
 
 		try {
@@ -233,10 +233,10 @@ export class AIFinancialAdvisor {
 			}
 
 			const advice = JSON.parse(content);
-			return advice.recommendations || this.mockState.insights;
+			return advice.recommendations || this.getMockFinancialAdvice();
 		} catch (error) {
 			console.error("Error getting financial advice:", error);
-			return this.mockState.insights;
+			return this.getMockFinancialAdvice();
 		}
 	}
 
@@ -244,7 +244,7 @@ export class AIFinancialAdvisor {
 		portfolio: any
 	): Promise<PortfolioSuggestion[]> {
 		if (!this.isApiAvailable || !this.openai) {
-			return this.mockState.portfolioSuggestions;
+			return this.getMockPortfolioSuggestions();
 		}
 
 		try {
@@ -273,11 +273,11 @@ export class AIFinancialAdvisor {
 
 			const suggestions = JSON.parse(content);
 			return (
-				suggestions.recommendations || this.mockState.portfolioSuggestions
+				suggestions.recommendations || this.getMockPortfolioSuggestions()
 			);
 		} catch (error) {
 			console.error("Error getting portfolio suggestions:", error);
-			return this.mockState.portfolioSuggestions;
+			return this.getMockPortfolioSuggestions();
 		}
 	}
 
@@ -337,7 +337,7 @@ export class AIFinancialAdvisor {
 
 	async getTaxOptimizationAdvice(financialData: any): Promise<Insight[]> {
 		if (!this.isApiAvailable || !this.openai) {
-			return this.mockState.insights;
+			return this.getMockFinancialAdvice();
 		}
 
 		try {
@@ -365,10 +365,10 @@ export class AIFinancialAdvisor {
 			}
 
 			const advice = JSON.parse(content);
-			return advice.recommendations || this.mockState.insights;
+			return advice.recommendations || this.getMockFinancialAdvice();
 		} catch (error) {
 			console.error("Error getting tax optimization advice:", error);
-			return this.mockState.insights;
+			return this.getMockFinancialAdvice();
 		}
 	}
 }

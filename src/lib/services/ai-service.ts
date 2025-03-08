@@ -85,6 +85,15 @@ export class AIMarketAnalyzer {
 	}
 
 	async analyzeSentiment(news: NewsArticle[]): Promise<MarketSentiment> {
+		if (!this.isApiAvailable || !this.openai) {
+			return {
+				overallSentiment: "neutral",
+				confidenceScore: 0.5,
+				keyFactors: ["AI service unavailable"],
+				timestamp: new Date().toISOString(),
+			};
+		}
+
 		const newsContext = news
 			.map((article) => `${article.title}: ${article.summary}`)
 			.join("\n");
@@ -105,7 +114,12 @@ export class AIMarketAnalyzer {
 			response_format: { type: "json_object" },
 		});
 
-		const analysis = JSON.parse(response.choices[0].message.content);
+		const content = response.choices[0].message.content;
+		if (!content) {
+			throw new Error("No content in OpenAI response");
+		}
+
+		const analysis = JSON.parse(content);
 
 		return {
 			overallSentiment: analysis.sentiment,
@@ -120,6 +134,17 @@ export class AIMarketAnalyzer {
 		historicalData: any[],
 		sentiment: MarketSentiment
 	): Promise<PredictionResult> {
+		if (!this.isApiAvailable || !this.openai) {
+			return {
+				symbol,
+				predictedMovement: "sideways",
+				confidenceScore: 0.5,
+				timeframe: "short-term",
+				supportingFactors: ["AI service unavailable"],
+				timestamp: new Date().toISOString(),
+			};
+		}
+
 		const context = {
 			symbol,
 			historicalTrend: this.analyzeTrend(historicalData),
@@ -145,7 +170,12 @@ export class AIMarketAnalyzer {
 			response_format: { type: "json_object" },
 		});
 
-		const prediction = JSON.parse(response.choices[0].message.content);
+		const content = response.choices[0].message.content;
+		if (!content) {
+			throw new Error("No content in OpenAI response");
+		}
+
+		const prediction = JSON.parse(content);
 
 		return {
 			symbol,
